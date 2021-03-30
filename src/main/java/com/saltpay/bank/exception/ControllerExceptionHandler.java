@@ -7,11 +7,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @ControllerAdvice
 public class ControllerExceptionHandler {
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<String> handleRuntimeException(RuntimeException re) {
-        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body("ERROR: " + re.getMessage());
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<Void> handleUserNotFoundException(UserNotFoundException re) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
-    //TODO: null pointer exception
-    //TODO usernotfound exception 404
+    @ExceptionHandler(InvalidRequestAccountException.class)
+    public ResponseEntity<Void> handleInvalidRequestAccountException(InvalidRequestAccountException re) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    }
 }

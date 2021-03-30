@@ -35,7 +35,7 @@ class AccountServiceTest {
     private AccountService accountService;
 
     @Test
-    public void testCreateNewAccountSuccessfully(){
+    void testCreateNewAccountSuccessfully(){
         Long someUserID = 1L;
         String someUserName = "someUserName";
         Long someAccountID = 2L;
@@ -86,13 +86,13 @@ class AccountServiceTest {
 
 
     @Test
-    public void testCreateNewAccountWithNullRequest() {
+    void testCreateNewAccountWithNullRequest() {
         Throwable throwable = Assertions.catchThrowable(() ->accountService.createNewAccount(null));
         Assertions.assertThat(throwable).isInstanceOf(InvalidRequestAccountException.class);
     }
 
     @Test
-    public void testCreateNewAccountWithNotFoundUserId() {
+    void testCreateNewAccountWithNotFoundUserId() {
         Long someId = 1L;
         RequestAccountDTO requestAccountDTO =
                 RequestAccountDTO.builder()

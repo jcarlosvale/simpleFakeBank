@@ -22,7 +22,7 @@ class RequestAccountDTOTest {
     }
 
     @Test
-    public void validUserIdTest() {
+    void validUserIdTest() {
         RequestAccountDTO requestAccountDTO = new RequestAccountDTO(1L, new BigDecimal("0.01"));
 
         Set<ConstraintViolation<RequestAccountDTO>> violations = validator.validate(requestAccountDTO);
@@ -31,7 +31,7 @@ class RequestAccountDTOTest {
     }
 
     @Test
-    public void invalidUserIdTest() {
+    void invalidUserIdTest() {
         RequestAccountDTO requestAccountDTO = new RequestAccountDTO(0L, new BigDecimal("10.21"));
 
         Set<ConstraintViolation<RequestAccountDTO>> violations = validator.validate(requestAccountDTO);
@@ -42,7 +42,7 @@ class RequestAccountDTOTest {
     }
 
     @Test
-    public void invalidInitialAmountTest() {
+    void invalidInitialAmountTest() {
         RequestAccountDTO requestAccountDTO = new RequestAccountDTO(1L, new BigDecimal("0.00"));
 
         Set<ConstraintViolation<RequestAccountDTO>> violations = validator.validate(requestAccountDTO);
@@ -53,7 +53,7 @@ class RequestAccountDTOTest {
     }
 
     @Test
-    public void invalidInitialAmountFractionDigitsLessTest() {
+    void invalidInitialAmountFractionDigitsLessTest() {
         RequestAccountDTO requestAccountDTO = new RequestAccountDTO(1L, new BigDecimal("1.012"));
 
         Set<ConstraintViolation<RequestAccountDTO>> violations = validator.validate(requestAccountDTO);
