@@ -1,6 +1,5 @@
 package com.saltpay.bank.dto;
 
-import com.saltpay.bank.configuration.BankConstants;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +9,7 @@ import javax.validation.Validator;
 import java.math.BigDecimal;
 import java.util.Set;
 
+import static com.saltpay.bank.configuration.BankConstants.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class RequestAccountDTOTest {
@@ -38,7 +38,7 @@ class RequestAccountDTOTest {
 
         assertThat(violations.size()).isEqualTo(1);
         violations.forEach(action -> assertThat(action.getMessage())
-                .isEqualTo(BankConstants.INVALID_USER_ID));
+                .isEqualTo(INVALID_USER_ID));
     }
 
     @Test
@@ -49,6 +49,17 @@ class RequestAccountDTOTest {
 
         assertThat(violations.size()).isEqualTo(1);
         violations.forEach(action -> assertThat(action.getMessage())
-                .isEqualTo(BankConstants.INVALID_INITIAL_AMOUNT));
+                .isEqualTo(INVALID_INITIAL_AMOUNT));
+    }
+
+    @Test
+    public void invalidInitialAmountFractionDigitsLessTest() {
+        RequestAccountDTO requestAccountDTO = new RequestAccountDTO(1L, new BigDecimal("1.012"));
+
+        Set<ConstraintViolation<RequestAccountDTO>> violations = validator.validate(requestAccountDTO);
+
+        assertThat(violations.size()).isEqualTo(1);
+        violations.forEach(action -> assertThat(action.getMessage())
+                .isEqualTo(INVALID_INITIAL_AMOUNT_FORMAT));
     }
 }

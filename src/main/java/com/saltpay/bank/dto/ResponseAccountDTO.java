@@ -18,5 +18,4 @@ public class ResponseAccountDTO {
     private BigDecimal balance;
     @JsonProperty("created_at")
     private LocalDateTime creationTimestamp;
-
 }
