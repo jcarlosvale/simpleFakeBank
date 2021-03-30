@@ -1,11 +1,20 @@
 package com.saltpay.bank.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
 public class Operation {
 
     public static final String PREFIX_TABLE = "operation_";
@@ -29,6 +38,6 @@ public class Operation {
 
     @NotNull
     @Column(name = PREFIX_TABLE + "date_time", columnDefinition = "TIMESTAMP")
-    private LocalDateTime localDateTime;
+    private LocalDateTime operationDateTime;
 
 }

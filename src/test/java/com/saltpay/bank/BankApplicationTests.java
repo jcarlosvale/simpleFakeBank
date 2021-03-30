@@ -9,5 +9,7 @@ class BankApplicationTests {
 	@Test
 	void contextLoads() {
 	}
+//TODO: inexistent user
+//TODO: invalid request new account
 
 }
