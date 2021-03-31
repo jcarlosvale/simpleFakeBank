@@ -1,14 +1,13 @@
 package com.saltpay.bank.controller;
 
 import com.saltpay.bank.dto.request.RequestAccountDTO;
+import com.saltpay.bank.dto.response.ResponseAccountBalanceDTO;
 import com.saltpay.bank.dto.response.ResponseAccountDTO;
 import com.saltpay.bank.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import javax.validation.Valid;
@@ -22,8 +21,16 @@ public class AccountController {
 
     private final AccountService accountService;
 
+    @GetMapping(
+            path     = ACCOUNT_END_POINT_V1 + "/{id}",
+            produces = MediaType.APPLICATION_JSON_VALUE
+            )
+    public ResponseEntity<ResponseAccountBalanceDTO> getBalance(@PathVariable("id") final long accountId) {
+        return ResponseEntity.ok(accountService.retrieveBalance(accountId));
+    }
+
     @PostMapping(
-            path = ACCOUNT_END_POINT_V1,
+            path     = ACCOUNT_END_POINT_V1,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )

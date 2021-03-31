@@ -1,8 +1,12 @@
 package com.saltpay.bank.controller;
 
+import com.saltpay.bank.dto.UserDTO;
 import com.saltpay.bank.dto.request.RequestAccountDTO;
+import com.saltpay.bank.dto.response.ResponseAccountBalanceDTO;
 import com.saltpay.bank.entity.Account;
+import com.saltpay.bank.entity.User;
 import com.saltpay.bank.repository.AccountRepository;
+import com.saltpay.bank.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +40,10 @@ class AccountControllerTest {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
 
     @LocalServerPort
     private int randomServerPort = 0;
@@ -105,5 +113,48 @@ class AccountControllerTest {
         Throwable throwable = Assertions.catchThrowable(() ->restTemplate.postForEntity(url, request, Void.class));
         Assertions.assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
         Assertions.assertThat(((HttpClientErrorException) throwable).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+    }
+
+    @Test
+    void getAccountBalanceSuccessfulTest() {
+        BigDecimal someBalance = BigDecimal.valueOf(0.01);
+        User user = userRepository.findById(1L).get();
+        Account account = createAccount(user, BigDecimal.valueOf(100), someBalance);
+        ResponseAccountBalanceDTO expectedResponse =
+                ResponseAccountBalanceDTO.builder()
+                        .userDTO(UserDTO.builder()
+                                .id(user.getId())
+                                .name(user.getName())
+                                .build())
+                        .id(account.getId())
+                        .balance(account.getBalance())
+                        .build();
+        ResponseEntity<ResponseAccountBalanceDTO> response = restTemplate.getForEntity(url+"/{id}", ResponseAccountBalanceDTO.class, account.getId());
+        ResponseAccountBalanceDTO actualResponse = response.getBody();
+
+        expectedResponse.setId(actualResponse.getId());
+        expectedResponse.setCreationTimestamp(actualResponse.getCreationTimestamp());
+
+        Assertions.assertThat(actualResponse).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    void getAccountBalanceNotFoundTest() {
+        Throwable throwable = Assertions.catchThrowable(() ->restTemplate.getForEntity(url+"/{id}", ResponseAccountBalanceDTO.class, Long.MAX_VALUE));
+        Assertions.assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
+        Assertions.assertThat(((HttpClientErrorException) throwable).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+
+    }
+
+    public Account createAccount(User user, BigDecimal initialDepositAmount, BigDecimal balance) {
+        Account account =
+                Account.builder()
+                        .initialDepositAmount(initialDepositAmount)
+                        .creationTimestamp(LocalDateTime.now())
+                        .balance(balance)
+                        .user(user)
+                        .build();
+        accountRepository.save(account);
+        return account;
     }
 }

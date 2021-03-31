@@ -1,6 +1,7 @@
 package com.saltpay.bank.service;
 
 import com.saltpay.bank.dto.request.RequestAccountDTO;
+import com.saltpay.bank.dto.response.ResponseAccountBalanceDTO;
 import com.saltpay.bank.dto.response.ResponseAccountDTO;
 import com.saltpay.bank.entity.Account;
 import com.saltpay.bank.entity.User;
@@ -44,6 +45,33 @@ public class AccountService {
         return toDTO(account);
     }
 
+    public ResponseAccountBalanceDTO retrieveBalance(Long accountId) {
+        log.debug("Retrieving balance from accountId = {}", accountId);
+        Account account = getAccountById(accountId);
+        return ResponseAccountBalanceDTO.builder()
+                .userDTO(toDTO(account.getUser()))
+                .id(account.getId())
+                .balance(account.getBalance())
+                .creationTimestamp(getCurrentTimestamp())
+                .build();
+    }
+
+    @Transactional(propagation = Propagation.MANDATORY)
+    public void transfer(@NonNull Account senderAccount, @NonNull Account receiverAccount, BigDecimal value) {
+        log.debug("Starting transfer senderAccount: [{}] receiverAccount: [{}] value: [{}]",
+                senderAccount, receiverAccount, value);
+        throwsOnCondition(senderAccount.getBalance().compareTo(value) < 0,
+                InsufficientBalanceException::new,
+                String.format(ERROR_INSUFFICIENT_BALANCE, senderAccount.getId()));
+        throwsOnCondition(senderAccount.equals(receiverAccount), TransferNotAllowedException::new);
+        senderAccount.setBalance(senderAccount.getBalance().subtract(value));
+        receiverAccount.setBalance(receiverAccount.getBalance().add(value));
+        accountRepository.save(senderAccount);
+        accountRepository.save(receiverAccount);
+        log.debug("Executed transfer senderAccount: [{}] receiverAccount: [{}] value: [{}]",
+                senderAccount, receiverAccount, value);
+    }
+
     Account getAccountById(Long accountId) {
         return accountRepository
                 .findById(accountId)
@@ -70,21 +98,5 @@ public class AccountService {
 
     LocalDateTime getCurrentTimestamp() {
             return LocalDateTime.now();
-    }
-
-    @Transactional(propagation = Propagation.MANDATORY)
-    public void transfer(@NonNull Account senderAccount, @NonNull Account receiverAccount, BigDecimal value) {
-        log.debug("Starting transfer senderAccount: [{}] receiverAccount: [{}] value: [{}]",
-                senderAccount, receiverAccount, value);
-        throwsOnCondition(senderAccount.getBalance().compareTo(value) < 0,
-                InsufficientBalanceException::new,
-                String.format(ERROR_INSUFFICIENT_BALANCE, senderAccount.getId()));
-        throwsOnCondition(senderAccount.equals(receiverAccount), TransferNotAllowedException::new);
-        senderAccount.setBalance(senderAccount.getBalance().subtract(value));
-        receiverAccount.setBalance(receiverAccount.getBalance().add(value));
-        accountRepository.save(senderAccount);
-        accountRepository.save(receiverAccount);
-        log.debug("Executed transfer senderAccount: [{}] receiverAccount: [{}] value: [{}]",
-                senderAccount, receiverAccount, value);
     }
 }

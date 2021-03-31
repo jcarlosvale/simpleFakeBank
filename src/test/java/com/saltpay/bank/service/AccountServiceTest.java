@@ -1,6 +1,8 @@
 package com.saltpay.bank.service;
 
+import com.saltpay.bank.dto.UserDTO;
 import com.saltpay.bank.dto.request.RequestAccountDTO;
+import com.saltpay.bank.dto.response.ResponseAccountBalanceDTO;
 import com.saltpay.bank.dto.response.ResponseAccountDTO;
 import com.saltpay.bank.entity.Account;
 import com.saltpay.bank.entity.User;
@@ -19,6 +21,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -77,7 +80,7 @@ class AccountServiceTest {
 
         when(userRepository.findById(someUserID)).thenReturn(Optional.ofNullable(user));
         when(accountRepository.save(accountWithoutId)).thenReturn(accountWithId);
-        when(accountService.getCurrentTimestamp()).thenReturn(LocalDateTime.MIN);
+        doReturn(LocalDateTime.MIN).when(accountService).getCurrentTimestamp();
 
         ResponseAccountDTO actualResponseAccountDTO = accountService.createNewAccount(requestAccountDTO);
         Assertions.assertThat(actualResponseAccountDTO).isEqualTo(expectedResponseAccountDTO);
@@ -152,5 +155,43 @@ class AccountServiceTest {
                         .build();
         Throwable throwable = Assertions.catchThrowable(() ->accountService.transfer(sender, sender, BigDecimal.valueOf(0.01)));
         Assertions.assertThat(throwable).isInstanceOf(TransferNotAllowedException.class);
+    }
+
+    @Test
+    void testRetrieveBalanceSuccessful() {
+        Long someAccountId = 2L;
+        BigDecimal someBalance = BigDecimal.valueOf(1.11);
+        User user =
+                User.builder()
+                        .id(1L)
+                        .name("some name")
+                        .build();
+        Account account =
+                Account.builder()
+                        .id(someAccountId)
+                        .initialDepositAmount(BigDecimal.valueOf(100))
+                        .creationTimestamp(LocalDateTime.now())
+                        .balance(someBalance)
+                        .user(user)
+                        .build();
+
+        ResponseAccountBalanceDTO expectedResponse =
+                ResponseAccountBalanceDTO.builder()
+                        .userDTO(UserDTO
+                                .builder()
+                                .id(user.getId())
+                                .name(user.getName())
+                                .build())
+                        .id(account.getId())
+                        .balance(account.getBalance())
+                        .creationTimestamp(LocalDateTime.MIN)
+                        .build();
+
+        doReturn(LocalDateTime.MIN).when(accountService).getCurrentTimestamp();
+        doReturn(account).when(accountService).getAccountById(someAccountId);
+
+        ResponseAccountBalanceDTO actualResponse = accountService.retrieveBalance(someAccountId);
+
+        Assertions.assertThat(actualResponse).isEqualTo(expectedResponse);
     }
 }

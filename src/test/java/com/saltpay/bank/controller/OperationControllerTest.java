@@ -199,9 +199,6 @@ class OperationControllerTest {
         Assertions.assertThat(((HttpClientErrorException) throwable).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 
-
-
-
     public Account createAccount(User user, BigDecimal initialDepositAmount) {
         Account account =
                 Account.builder()
@@ -213,5 +210,4 @@ class OperationControllerTest {
         accountRepository.save(account);
         return account;
     }
-
 }

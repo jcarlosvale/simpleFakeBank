@@ -1,6 +1,7 @@
 package com.saltpay.bank.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.saltpay.bank.dto.UserDTO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,9 +14,9 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ResponseAccountDTO {
-    @JsonProperty("user_id")
-    private Long userId;
+public class ResponseAccountBalanceDTO {
+    @JsonProperty("owner")
+    private UserDTO userDTO;
 
     @JsonProperty("account_id")
     private Long id;
