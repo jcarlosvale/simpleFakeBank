@@ -1,5 +1,6 @@
-package com.saltpay.bank.dto;
+package com.saltpay.bank.dto.request;
 
+import com.saltpay.bank.dto.request.RequestAccountDTO;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 

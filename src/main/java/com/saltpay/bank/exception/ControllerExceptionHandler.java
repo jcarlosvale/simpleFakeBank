@@ -8,13 +8,14 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class ControllerExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<Void> handleUserNotFoundException(UserNotFoundException re) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    @ExceptionHandler({UserNotFoundException.class, AccountNotFoundException.class})
+    public ResponseEntity<String> handleUserNotFoundException(Exception re) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(re.getMessage());
     }
 
-    @ExceptionHandler(InvalidRequestAccountException.class)
-    public ResponseEntity<Void> handleInvalidRequestAccountException(InvalidRequestAccountException re) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+    @ExceptionHandler({InvalidRequestAccountException.class, InsufficientBalanceException.class,
+            InvalidRequestOperationException.class, TransferNotAllowedException.class})
+    public ResponseEntity<String> handleInvalidRequestAccountException(Exception re) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(re.getMessage());
     }
 }

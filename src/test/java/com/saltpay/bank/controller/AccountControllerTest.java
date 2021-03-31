@@ -1,6 +1,6 @@
 package com.saltpay.bank.controller;
 
-import com.saltpay.bank.dto.RequestAccountDTO;
+import com.saltpay.bank.dto.request.RequestAccountDTO;
 import com.saltpay.bank.entity.Account;
 import com.saltpay.bank.repository.AccountRepository;
 import org.assertj.core.api.Assertions;
@@ -24,6 +24,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static com.saltpay.bank.controller.AccountController.ACCOUNT_END_POINT_V1;
+import static com.saltpay.bank.controller.TestUtil.extractId;
 
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -104,10 +105,5 @@ class AccountControllerTest {
         Throwable throwable = Assertions.catchThrowable(() ->restTemplate.postForEntity(url, request, Void.class));
         Assertions.assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
         Assertions.assertThat(((HttpClientErrorException) throwable).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-    }
-
-    private Long extractId(String locationUrl, String url) {
-        url = url + "/";
-        return Long.valueOf(locationUrl.replace(url, ""));
     }
 }

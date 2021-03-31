@@ -1,11 +1,10 @@
 package com.saltpay.bank.service;
 
-import com.saltpay.bank.dto.RequestAccountDTO;
-import com.saltpay.bank.dto.ResponseAccountDTO;
+import com.saltpay.bank.dto.request.RequestAccountDTO;
+import com.saltpay.bank.dto.response.ResponseAccountDTO;
 import com.saltpay.bank.entity.Account;
 import com.saltpay.bank.entity.User;
-import com.saltpay.bank.exception.InvalidRequestAccountException;
-import com.saltpay.bank.exception.UserNotFoundException;
+import com.saltpay.bank.exception.*;
 import com.saltpay.bank.repository.AccountRepository;
 import com.saltpay.bank.repository.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -103,4 +102,55 @@ class AccountServiceTest {
         Assertions.assertThat(throwable).isInstanceOf(UserNotFoundException.class);
     }
 
+    @Test
+    void testGetAccountNotFound() {
+        Long someId = 1L;
+        when(accountRepository.findById(someId)).thenReturn(Optional.empty());
+        Throwable throwable = Assertions.catchThrowable(() ->accountService.getAccountById(someId));
+        Assertions.assertThat(throwable).isInstanceOf(AccountNotFoundException.class);
+    }
+
+    @Test
+    void testSuccessfulTransfer() {
+        Account sender =
+                Account.builder()
+                        .id(1L)
+                        .balance(BigDecimal.valueOf(0.01))
+                        .build();
+        Account receiver =
+                Account.builder()
+                        .id(2L)
+                        .balance(BigDecimal.valueOf(0.99))
+                        .build();
+        accountService.transfer(sender, receiver, BigDecimal.valueOf(0.01));
+        Assertions.assertThat(sender.getBalance()).isEqualTo("0.00");
+        Assertions.assertThat(receiver.getBalance()).isEqualTo("1.00");
+    }
+
+    @Test
+    void testUnsuccessfulTransfer() {
+        Account sender =
+                Account.builder()
+                        .id(1L)
+                        .balance(BigDecimal.valueOf(0.00))
+                        .build();
+        Account receiver =
+                Account.builder()
+                        .id(2L)
+                        .balance(BigDecimal.valueOf(1.00))
+                        .build();
+        Throwable throwable = Assertions.catchThrowable(() ->accountService.transfer(sender, receiver, BigDecimal.valueOf(0.01)));
+        Assertions.assertThat(throwable).isInstanceOf(InsufficientBalanceException.class);
+    }
+
+    @Test
+    void testNotAllowedSameAccountTransfer() {
+        Account sender =
+                Account.builder()
+                        .id(1L)
+                        .balance(BigDecimal.valueOf(1.00))
+                        .build();
+        Throwable throwable = Assertions.catchThrowable(() ->accountService.transfer(sender, sender, BigDecimal.valueOf(0.01)));
+        Assertions.assertThat(throwable).isInstanceOf(TransferNotAllowedException.class);
+    }
 }

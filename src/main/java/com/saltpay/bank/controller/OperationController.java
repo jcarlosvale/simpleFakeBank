@@ -1,8 +1,8 @@
 package com.saltpay.bank.controller;
 
-import com.saltpay.bank.dto.request.RequestAccountDTO;
-import com.saltpay.bank.dto.response.ResponseAccountDTO;
-import com.saltpay.bank.service.AccountService;
+import com.saltpay.bank.dto.request.RequestOperationDTO;
+import com.saltpay.bank.dto.response.ResponseOperationDTO;
+import com.saltpay.bank.service.OperationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,25 +16,24 @@ import java.net.URI;
 
 @RestController
 @RequiredArgsConstructor
-public class AccountController {
+public class OperationController {
+    public static final String OPERATION_END_POINT_V1 = "/v1/operations";
 
-    public static final String ACCOUNT_END_POINT_V1 = "/v1/accounts";
-
-    private final AccountService accountService;
+    private final OperationService operationService;
 
     @PostMapping(
-            path = ACCOUNT_END_POINT_V1,
+            path = OPERATION_END_POINT_V1,
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Void> postAccount(@Valid @RequestBody RequestAccountDTO requestAccountDTO) {
-        ResponseAccountDTO responseAccountDTO = accountService.createNewAccount(requestAccountDTO);
+    public ResponseEntity<Void> postAccount(@Valid @RequestBody RequestOperationDTO requestOperationDTO) {
+        ResponseOperationDTO responseOperationDTO = operationService.createNewOperation(requestOperationDTO);
 
         URI uri =
                 ServletUriComponentsBuilder
                         .fromCurrentRequest()
                         .path("/{id}")
-                        .buildAndExpand(responseAccountDTO.getId())
+                        .buildAndExpand(responseOperationDTO.getId())
                         .toUri();
 
         return ResponseEntity.created(uri).build();

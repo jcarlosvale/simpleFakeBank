@@ -1,4 +1,4 @@
-package com.saltpay.bank.dto;
+package com.saltpay.bank.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
@@ -23,6 +23,6 @@ public class RequestAccountDTO {
     @JsonProperty("initial_amount")
     @NotNull
     @DecimalMin(value = "0.0", inclusive = false,  message = INVALID_INITIAL_AMOUNT)
-    @Digits(integer = 9, fraction = 2, message = INVALID_INITIAL_AMOUNT_FORMAT)
+    @Digits(integer = 12, fraction = 2, message = INVALID_INITIAL_AMOUNT_FORMAT)
     private BigDecimal initialDepositAmount;
 }
