@@ -1,6 +1,6 @@
 package com.saltpay.bank.service.mapper;
 
-import com.saltpay.bank.dto.*;
+import com.saltpay.bank.dto.UserDTO;
 import com.saltpay.bank.dto.request.RequestAccountDTO;
 import com.saltpay.bank.dto.request.RequestOperationDTO;
 import com.saltpay.bank.dto.response.ResponseAccountDTO;
@@ -18,7 +18,7 @@ public class BankMapper {
                 .build();
     }
 
-    public static UserDTO toDTO(User user) {
+    public static UserDTO toResponseOperationDTO(User user) {
         return UserDTO
                 .builder()
                 .id(user.getId())
@@ -26,7 +26,7 @@ public class BankMapper {
                 .build();
     }
 
-    public static ResponseAccountDTO toDTO(Account account) {
+    public static ResponseAccountDTO toResponseOperationDTO(Account account) {
         return ResponseAccountDTO
                 .builder()
                 .userId(account.getUser().getId())
@@ -43,7 +43,7 @@ public class BankMapper {
                 .build();
     }
 
-    public static ResponseOperationDTO toDTO(Operation operation) {
+    public static ResponseOperationDTO toResponseOperationDTO(Operation operation) {
         return ResponseOperationDTO
                 .builder()
                 .id(operation.getId())

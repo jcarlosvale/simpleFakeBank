@@ -8,6 +8,7 @@ import com.saltpay.bank.entity.User;
 import com.saltpay.bank.exception.*;
 import com.saltpay.bank.repository.AccountRepository;
 import com.saltpay.bank.repository.UserRepository;
+import com.saltpay.bank.service.mapper.BankMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -22,7 +23,7 @@ import java.util.Objects;
 
 import static com.saltpay.bank.configuration.BankConstants.*;
 import static com.saltpay.bank.service.ServiceUtil.throwsOnCondition;
-import static com.saltpay.bank.service.mapper.BankMapper.toDTO;
+import static com.saltpay.bank.service.mapper.BankMapper.toResponseOperationDTO;
 import static com.saltpay.bank.service.mapper.BankMapper.toEntity;
 
 @Service
@@ -42,14 +43,14 @@ public class AccountService {
         fillMissingFields(account, user);
         account = accountRepository.save(account);
         log.debug("Created account - {}", account);
-        return toDTO(account);
+        return toResponseOperationDTO(account);
     }
 
     public ResponseAccountBalanceDTO retrieveBalance(Long accountId) {
         log.debug("Retrieving balance from accountId = {}", accountId);
         Account account = getAccountById(accountId);
         return ResponseAccountBalanceDTO.builder()
-                .userDTO(toDTO(account.getUser()))
+                .userDTO(BankMapper.toResponseOperationDTO(account.getUser()))
                 .id(account.getId())
                 .balance(account.getBalance())
                 .creationTimestamp(getCurrentTimestamp())

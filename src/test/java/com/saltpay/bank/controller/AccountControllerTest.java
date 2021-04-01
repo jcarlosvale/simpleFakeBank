@@ -28,6 +28,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 import static com.saltpay.bank.controller.AccountController.ACCOUNT_END_POINT_V1;
+import static com.saltpay.bank.controller.AccountController.ACCOUNT_GET_END_POINT_V1;
 import static com.saltpay.bank.controller.TestUtil.extractId;
 
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -51,7 +52,7 @@ class AccountControllerTest {
     @BeforeEach
     public void beforeTest() {
         restTemplate = new RestTemplate();
-        url = "http://localhost:" +  randomServerPort + ACCOUNT_END_POINT_V1;
+        url = "http://localhost:" +  randomServerPort;
     }
 
     @Test
@@ -67,12 +68,13 @@ class AccountControllerTest {
         HttpEntity<RequestAccountDTO> request =
                 new HttpEntity<>(requestAccountDTO);
 
-        ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
+        ResponseEntity<Void> response = restTemplate.postForEntity(url + ACCOUNT_END_POINT_V1, request, Void.class);
 
         Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
         Assertions.assertThat(response.getHeaders().get(HttpHeaders.LOCATION)).isNotNull();
 
-        Long objectId = extractId(Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0), url);
+        Long objectId = extractId(Objects.requireNonNull(response.getHeaders().get(HttpHeaders.LOCATION)).get(0),
+                url + ACCOUNT_END_POINT_V1);
 
         Account actualAccount = accountRepository.findById(objectId).orElse(new Account());
         Assertions.assertThat(actualAccount.getInitialDepositAmount()).isEqualTo(initialAmount);
@@ -93,7 +95,7 @@ class AccountControllerTest {
         HttpEntity<RequestAccountDTO> request =
                 new HttpEntity<>(requestAccountDTO);
 
-        Throwable throwable = Assertions.catchThrowable(() ->restTemplate.postForEntity(url, request, Void.class));
+        Throwable throwable = Assertions.catchThrowable(() ->restTemplate.postForEntity(url + ACCOUNT_END_POINT_V1, request, Void.class));
         Assertions.assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
         Assertions.assertThat(((HttpClientErrorException) throwable).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
     }
@@ -110,7 +112,7 @@ class AccountControllerTest {
         HttpEntity<RequestAccountDTO> request =
                 new HttpEntity<>(requestAccountDTO);
 
-        Throwable throwable = Assertions.catchThrowable(() ->restTemplate.postForEntity(url, request, Void.class));
+        Throwable throwable = Assertions.catchThrowable(() ->restTemplate.postForEntity(url + ACCOUNT_END_POINT_V1, request, Void.class));
         Assertions.assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
         Assertions.assertThat(((HttpClientErrorException) throwable).getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
     }
@@ -129,18 +131,19 @@ class AccountControllerTest {
                         .id(account.getId())
                         .balance(account.getBalance())
                         .build();
-        ResponseEntity<ResponseAccountBalanceDTO> response = restTemplate.getForEntity(url+"/{id}", ResponseAccountBalanceDTO.class, account.getId());
+        ResponseEntity<ResponseAccountBalanceDTO> response = restTemplate.getForEntity(url + ACCOUNT_GET_END_POINT_V1, ResponseAccountBalanceDTO.class, account.getId());
         ResponseAccountBalanceDTO actualResponse = response.getBody();
 
         expectedResponse.setId(actualResponse.getId());
         expectedResponse.setCreationTimestamp(actualResponse.getCreationTimestamp());
 
+        Assertions.assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         Assertions.assertThat(actualResponse).isEqualTo(expectedResponse);
     }
 
     @Test
     void getAccountBalanceNotFoundTest() {
-        Throwable throwable = Assertions.catchThrowable(() ->restTemplate.getForEntity(url+"/{id}", ResponseAccountBalanceDTO.class, Long.MAX_VALUE));
+        Throwable throwable = Assertions.catchThrowable(() ->restTemplate.getForEntity(url + ACCOUNT_GET_END_POINT_V1, ResponseAccountBalanceDTO.class, Long.MAX_VALUE));
         Assertions.assertThat(throwable).isInstanceOf(HttpClientErrorException.class);
         Assertions.assertThat(((HttpClientErrorException) throwable).getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
 

@@ -18,11 +18,13 @@ import java.net.URI;
 public class AccountController {
 
     public static final String ACCOUNT_END_POINT_V1 = "/v1/accounts";
+    public static final String ACCOUNT_GET_END_POINT_V1 = ACCOUNT_END_POINT_V1 + "/{id}";
+
 
     private final AccountService accountService;
 
     @GetMapping(
-            path     = ACCOUNT_END_POINT_V1 + "/{id}",
+            path     = ACCOUNT_GET_END_POINT_V1,
             produces = MediaType.APPLICATION_JSON_VALUE
             )
     public ResponseEntity<ResponseAccountBalanceDTO> getBalance(@PathVariable("id") final long accountId) {
