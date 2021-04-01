@@ -4,6 +4,9 @@ import com.saltpay.bank.dto.request.RequestOperationDTO;
 import com.saltpay.bank.dto.response.ResponseOperationDTO;
 import com.saltpay.bank.dto.response.ResponseOperationsDTO;
 import com.saltpay.bank.service.OperationService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,13 @@ public class OperationController {
             path     = OPERATION_GET_END_POINT_V1,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
+    @ApiOperation(
+            value = "Retrieves transfer history for a given account.",
+            notes = "Given an account id, retrieves the operations/transfers where this account has participated.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "List of operations"),
+            @ApiResponse(code = 404, message = "Account not found.")
+    })
     public ResponseEntity<ResponseOperationsDTO> getOperations(@PathVariable("accountId") final long accountId) {
         return ResponseEntity.ok(operationService.retrieveOperations(accountId));
     }
@@ -43,7 +53,15 @@ public class OperationController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Void> postAccount(@Valid @RequestBody RequestOperationDTO requestOperationDTO) {
+    @ApiOperation(
+            value = "Creates new transfer",
+            notes = "Transfer amounts between any two accounts, including those owned by different customers.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Transfer created."),
+            @ApiResponse(code = 404, message = "Sender/receiver account not found."),
+            @ApiResponse(code = 400, message = "Sender/receiver account id negative, Insufficient balance to transfer, Same account used in the transfer operation")
+    })
+    public ResponseEntity postOperation(@Valid @RequestBody RequestOperationDTO requestOperationDTO) {
         ResponseOperationDTO responseOperationDTO = operationService.createNewOperation(requestOperationDTO);
 
         URI uri =

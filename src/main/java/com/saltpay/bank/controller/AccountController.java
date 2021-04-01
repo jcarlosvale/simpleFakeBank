@@ -4,6 +4,9 @@ import com.saltpay.bank.dto.request.RequestAccountDTO;
 import com.saltpay.bank.dto.response.ResponseAccountBalanceDTO;
 import com.saltpay.bank.dto.response.ResponseAccountDTO;
 import com.saltpay.bank.service.AccountService;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiResponse;
+import io.swagger.annotations.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +37,12 @@ public class AccountController {
             path     = ACCOUNT_GET_END_POINT_V1,
             produces = MediaType.APPLICATION_JSON_VALUE
             )
+    @ApiOperation(
+            value = "Get account balance", notes = "Given an account id, retrieves the balance")
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Account balance."),
+            @ApiResponse(code = 404, message = "Account not found.")
+    })
     public ResponseEntity<ResponseAccountBalanceDTO> getBalance(@PathVariable("id") final long accountId) {
         return ResponseEntity.ok(accountService.retrieveBalance(accountId));
     }
@@ -43,7 +52,16 @@ public class AccountController {
             consumes = MediaType.APPLICATION_JSON_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Void> postAccount(@Valid @RequestBody RequestAccountDTO requestAccountDTO) {
+    @ApiOperation(
+            value = "Create new account",
+            notes = "Create a new bank account for a customer, with an initial deposit amount.\n" +
+                    "A single customer may have multiple bank accounts.")
+    @ApiResponses(value = {
+            @ApiResponse(code = 201, message = "Account created."),
+            @ApiResponse(code = 404, message = "Customer not found to create a new account."),
+            @ApiResponse(code = 400, message = "Invalid request new account information: negative initial amount, negative customer id")
+    })
+    public ResponseEntity postAccount(@Valid @RequestBody RequestAccountDTO requestAccountDTO) {
         ResponseAccountDTO responseAccountDTO = accountService.createNewAccount(requestAccountDTO);
 
         URI uri =
