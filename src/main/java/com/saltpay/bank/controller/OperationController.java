@@ -13,6 +13,14 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 
+/**
+ * Operation Controller exposing 2 endpoints:
+ * - GET
+ *      given and account ID, retrieves your operations
+ * - POST
+ *      creates a new transfer operation receiving in your body the sender and receiver accounts ids and the value used
+ *      in the transaction
+ */
 @RestController
 @RequiredArgsConstructor
 public class OperationController {

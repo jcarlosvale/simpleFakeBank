@@ -1,5 +1,8 @@
 package com.saltpay.bank.configuration;
 
+/**
+ * Constants used in the Application
+ */
 public final class BankConstants {
 
     /*

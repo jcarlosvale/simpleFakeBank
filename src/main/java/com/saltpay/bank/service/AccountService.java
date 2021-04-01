@@ -23,8 +23,7 @@ import java.util.Objects;
 
 import static com.saltpay.bank.configuration.BankConstants.*;
 import static com.saltpay.bank.service.ServiceUtil.throwsOnCondition;
-import static com.saltpay.bank.service.mapper.BankMapper.toResponseOperationDTO;
-import static com.saltpay.bank.service.mapper.BankMapper.toEntity;
+import static com.saltpay.bank.service.mapper.BankMapper.toAccountEntity;
 
 @Service
 @RequiredArgsConstructor
@@ -39,18 +38,17 @@ public class AccountService {
         throwsOnCondition(Objects.isNull(requestAccountDTO), InvalidRequestAccountException::new,
                 ERROR_MESSAGE_NULL_REQUEST_ACCOUNT_DTO);
         User user = getUserById(requestAccountDTO.getUserId());
-        Account account = toEntity(requestAccountDTO);
+        Account account = toAccountEntity(requestAccountDTO);
         fillMissingFields(account, user);
         account = accountRepository.save(account);
         log.debug("Created account - {}", account);
-        return toResponseOperationDTO(account);
+        return BankMapper.toResponseAccountDTO(account);
     }
 
     public ResponseAccountBalanceDTO retrieveBalance(Long accountId) {
         log.debug("Retrieving balance from accountId = {}", accountId);
         Account account = getAccountById(accountId);
         return ResponseAccountBalanceDTO.builder()
-                .userDTO(BankMapper.toResponseOperationDTO(account.getUser()))
                 .id(account.getId())
                 .balance(account.getBalance())
                 .creationTimestamp(getCurrentTimestamp())

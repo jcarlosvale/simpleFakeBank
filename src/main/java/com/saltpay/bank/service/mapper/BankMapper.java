@@ -10,7 +10,7 @@ import com.saltpay.bank.entity.Operation;
 import com.saltpay.bank.entity.User;
 
 public class BankMapper {
-    public static Account toEntity(RequestAccountDTO requestAccountDTO) {
+    public static Account toAccountEntity(RequestAccountDTO requestAccountDTO) {
         return Account
                 .builder()
                 .initialDepositAmount(requestAccountDTO.getInitialDepositAmount())
@@ -18,15 +18,7 @@ public class BankMapper {
                 .build();
     }
 
-    public static UserDTO toResponseOperationDTO(User user) {
-        return UserDTO
-                .builder()
-                .id(user.getId())
-                .name(user.getName())
-                .build();
-    }
-
-    public static ResponseAccountDTO toResponseOperationDTO(Account account) {
+    public static ResponseAccountDTO toResponseAccountDTO(Account account) {
         return ResponseAccountDTO
                 .builder()
                 .userId(account.getUser().getId())
@@ -36,7 +28,7 @@ public class BankMapper {
                 .build();
     }
 
-    public static Operation toEntity(RequestOperationDTO requestOperationDTO) {
+    public static Operation toOperationEntity(RequestOperationDTO requestOperationDTO) {
         return Operation
                 .builder()
                 .value(requestOperationDTO.getValue())

@@ -11,9 +11,11 @@ import com.saltpay.bank.service.mapper.BankMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.validation.Valid;
+import java.lang.management.OperatingSystemMXBean;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +25,6 @@ import java.util.stream.Collectors;
 import static com.saltpay.bank.configuration.BankConstants.ERROR_MESSAGE_NULL_REQUEST_OPERATION_DTO;
 import static com.saltpay.bank.service.ServiceUtil.throwsOnCondition;
 import static com.saltpay.bank.service.mapper.BankMapper.toResponseOperationDTO;
-import static com.saltpay.bank.service.mapper.BankMapper.toEntity;
 
 @Service
 @RequiredArgsConstructor
@@ -38,14 +39,19 @@ public class OperationService {
         log.debug("Creating a new operation - {}", requestOperationDTO);
         throwsOnCondition(Objects.isNull(requestOperationDTO), InvalidRequestOperationException::new,
                 ERROR_MESSAGE_NULL_REQUEST_OPERATION_DTO);
-        Operation operation = toEntity(requestOperationDTO);
+        Operation operation = BankMapper.toOperationEntity(requestOperationDTO);
         Account senderAccount = accountService.getAccountById(requestOperationDTO.getSenderAccountId());
         Account receiverAccount = accountService.getAccountById(requestOperationDTO.getReceiverAccountId());
         accountService.transfer(senderAccount, receiverAccount, requestOperationDTO.getValue());
         fillMissingFields(operation, senderAccount, receiverAccount);
         operation = operationRepository.save(operation);
+        logOperation(operation);
+        return toResponseOperationDTO(operation);
+    }
+
+    //TODO: method to simulate transaction error, how to fix?
+    public void logOperation(Operation operation) {
         log.debug("Created operation - {}", operation);
-        return BankMapper.toResponseOperationDTO(operation);
     }
 
     public ResponseOperationsDTO retrieveOperations(long accountId) {

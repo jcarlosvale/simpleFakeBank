@@ -1,6 +1,5 @@
 package com.saltpay.bank.controller;
 
-import com.saltpay.bank.dto.UserDTO;
 import com.saltpay.bank.dto.request.RequestAccountDTO;
 import com.saltpay.bank.dto.response.ResponseAccountBalanceDTO;
 import com.saltpay.bank.entity.Account;
@@ -29,7 +28,6 @@ import java.util.Objects;
 
 import static com.saltpay.bank.controller.AccountController.ACCOUNT_END_POINT_V1;
 import static com.saltpay.bank.controller.AccountController.ACCOUNT_GET_END_POINT_V1;
-import static com.saltpay.bank.controller.TestUtil.extractId;
 
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -124,10 +122,6 @@ class AccountControllerTest {
         Account account = createAccount(user, BigDecimal.valueOf(100), someBalance);
         ResponseAccountBalanceDTO expectedResponse =
                 ResponseAccountBalanceDTO.builder()
-                        .userDTO(UserDTO.builder()
-                                .id(user.getId())
-                                .name(user.getName())
-                                .build())
                         .id(account.getId())
                         .balance(account.getBalance())
                         .build();
@@ -159,5 +153,10 @@ class AccountControllerTest {
                         .build();
         accountRepository.save(account);
         return account;
+    }
+
+    public static Long extractId(String locationUrl, String url) {
+        url = url + "/";
+        return Long.valueOf(locationUrl.replace(url, ""));
     }
 }

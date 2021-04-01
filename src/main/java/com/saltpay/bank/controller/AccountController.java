@@ -13,6 +13,13 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import javax.validation.Valid;
 import java.net.URI;
 
+/**
+ * Account Controller exposing 2 endpoints:
+ * - GET
+ *      given and account ID, retrieves your balance
+ * - POST
+ *      creates a new account receiving in your body the required user id and initial amount
+ */
 @RestController
 @RequiredArgsConstructor
 public class AccountController {

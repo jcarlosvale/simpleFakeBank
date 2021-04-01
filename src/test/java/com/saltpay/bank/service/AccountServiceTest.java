@@ -177,11 +177,6 @@ class AccountServiceTest {
 
         ResponseAccountBalanceDTO expectedResponse =
                 ResponseAccountBalanceDTO.builder()
-                        .userDTO(UserDTO
-                                .builder()
-                                .id(user.getId())
-                                .name(user.getName())
-                                .build())
                         .id(account.getId())
                         .balance(account.getBalance())
                         .creationTimestamp(LocalDateTime.MIN)

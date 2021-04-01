@@ -9,12 +9,15 @@ import com.saltpay.bank.entity.User;
 import com.saltpay.bank.repository.AccountRepository;
 import com.saltpay.bank.repository.OperationRepository;
 import com.saltpay.bank.repository.UserRepository;
+import com.saltpay.bank.service.OperationService;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -23,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.math.BigDecimal;
@@ -31,11 +35,13 @@ import java.util.Objects;
 
 import static com.saltpay.bank.controller.OperationController.OPERATION_END_POINT_V1;
 import static com.saltpay.bank.controller.OperationController.OPERATION_GET_END_POINT_V1;
-import static com.saltpay.bank.controller.TestUtil.extractId;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 
 @SpringBootTest(webEnvironment= SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 class OperationControllerTest {
 
     private RestTemplate restTemplate;
@@ -49,6 +55,10 @@ class OperationControllerTest {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @SpyBean
+    @Autowired
+    private OperationService operationService;
 
     @LocalServerPort
     private int randomServerPort = 0;
@@ -122,6 +132,35 @@ class OperationControllerTest {
         Assertions.assertThat(actualOperation.getOperationDateTime()).isAfter(current);
         Assertions.assertThat(actualOperation.getSenderAccount().getBalance()).isEqualTo("0.00");
         Assertions.assertThat(actualOperation.getReceiverAccount().getBalance()).isEqualTo("1.00");
+    }
+
+    @Test
+    void validateTransactionCreatingNewOperationTest() {
+        User user1 = userRepository.findById(1L).get();
+        User user2 = userRepository.findById(2L).get();
+        BigDecimal someValue = BigDecimal.valueOf(0.01);
+        Account senderAccount = createAccount(user1, BigDecimal.valueOf(0.01));
+        Account receiverAccount = createAccount(user2, BigDecimal.valueOf(0.99));
+        RequestOperationDTO requestOperationDTO =
+                RequestOperationDTO.builder()
+                        .senderAccountId(senderAccount.getId())
+                        .receiverAccountId(receiverAccount.getId())
+                        .value(someValue)
+                        .build();
+
+        HttpEntity<RequestOperationDTO> request =
+                new HttpEntity<>(requestOperationDTO);
+
+        //simulate error
+        doThrow(RuntimeException.class).when(operationService).logOperation(any(Operation.class));
+
+        Throwable throwable = Assertions.catchThrowable(() ->restTemplate.postForEntity(url + OPERATION_END_POINT_V1, request, Void.class));
+        Assertions.assertThat(throwable).isInstanceOf(HttpServerErrorException.class);
+        Assertions.assertThat(((HttpServerErrorException) throwable).getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+
+        Assertions.assertThat(operationRepository.count()).isZero();
+        Assertions.assertThat(accountRepository.findById(senderAccount.getId()).get().getBalance()).isEqualTo("0.01");
+        Assertions.assertThat(accountRepository.findById(receiverAccount.getId()).get().getBalance()).isEqualTo("0.99");
     }
 
     @Test
@@ -296,5 +335,10 @@ class OperationControllerTest {
                         .build();
         accountRepository.save(account);
         return account;
+    }
+
+    public static Long extractId(String locationUrl, String url) {
+        url = url + "/";
+        return Long.valueOf(locationUrl.replace(url, ""));
     }
 }
