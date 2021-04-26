@@ -1,13 +1,11 @@
 package com.saltpay.bank.service.mapper;
 
-import com.saltpay.bank.dto.UserDTO;
 import com.saltpay.bank.dto.request.RequestAccountDTO;
 import com.saltpay.bank.dto.request.RequestOperationDTO;
 import com.saltpay.bank.dto.response.ResponseAccountDTO;
 import com.saltpay.bank.dto.response.ResponseOperationDTO;
 import com.saltpay.bank.entity.Account;
 import com.saltpay.bank.entity.Operation;
-import com.saltpay.bank.entity.User;
 
 public class BankMapper {
     public static Account toAccountEntity(RequestAccountDTO requestAccountDTO) {
